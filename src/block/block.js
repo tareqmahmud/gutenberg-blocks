@@ -11,7 +11,8 @@ import './style.scss';
 
 const {__} = wp.i18n; // Import __() from wp.i18n
 const {registerBlockType} = wp.blocks; // Import registerBlockType() from wp.blocks
-const {RichText} = wp.editor;
+const {RichText, InspectorControls, ColorPalette} = wp.blockEditor;
+const {PanelBody} = wp.components;
 
 /**
  * Register: aa Gutenberg Block.
@@ -44,11 +45,16 @@ registerBlockType('cgb/block-guten', {
 			selector: 'h2'
 		},
 
+		titleColor: {
+			type: 'string',
+			default: '#000'
+		},
+
 		body: {
 			type: 'string',
 			source: 'html',
 			selector: 'p'
-		}
+		},
 	},
 
 	/**
@@ -71,12 +77,32 @@ registerBlockType('cgb/block-guten', {
 			setAttributes({body})
 		}
 
-		return (
+		function onChangeTitleColor(titleColor) {
+			setAttributes({titleColor})
+		}
+
+		const colors = [
+			{name: 'firebrick', color: '#813939'},
+			{name: 'white', color: '#fff'},
+			{name: 'black', color: '#000'},
+		];
+
+		return ([
+			<InspectorControls style={{marginBottom: '40px'}}>
+				<PanelBody title={"Font Color Settings"}>
+					<p><strong>Select a Title Color: </strong></p>
+					<ColorPalette value={attributes.titleColor}
+								  colors={colors}
+								  onChange={onChangeTitleColor}/>
+				</PanelBody>
+			</InspectorControls>,
+
 			<div className="cta-container">
 				<RichText key="editable"
 						  tagName="h2"
 						  placeholder="Your CTA Title"
 						  value={attributes.title}
+						  style={{color: attributes.titleColor}}
 						  onChange={onChangeTitle}/>
 
 				<RichText key="editable"
@@ -85,7 +111,7 @@ registerBlockType('cgb/block-guten', {
 						  value={attributes.body}
 						  onChange={onChangeBody}/>
 			</div>
-		);
+		]);
 	},
 
 	/**
@@ -102,7 +128,7 @@ registerBlockType('cgb/block-guten', {
 	save: ({attributes}) => {
 		return (
 			<div className="cta-container">
-				<h2>{attributes.title}</h2>
+				<h2 style={{color: attributes.titleColor}}>{attributes.title}</h2>
 				<RichText.Content tagName="p"
 								  value={attributes.body}/>
 			</div>
